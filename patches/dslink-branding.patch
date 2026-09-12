@@ -1,0 +1,72 @@
+diff --git a/flutter/lib/desktop/widgets/remote_toolbar.dart b/flutter/lib/desktop/widgets/remote_toolbar.dart
+index 75fdbe1..f3ea2c4 100644
+--- a/flutter/lib/desktop/widgets/remote_toolbar.dart
++++ b/flutter/lib/desktop/widgets/remote_toolbar.dart
+@@ -286,7 +286,9 @@ class ToolbarState {
+             sessionId: sessionId, arg: kOptionHideToolbar),
+       ]);
+ 
+-      collapse.value = results[0] ?? false;
++      // D.S Link starts each remote-control session with the toolbar collapsed.
++      // It remains available to expand whenever an operator needs it.
++      collapse.value = true;
+       hide.value = results[1] ?? false;
+     } finally {
+       _isInitializing = false;
+diff --git a/flutter/windows/runner/Runner.rc b/flutter/windows/runner/Runner.rc
+index 88d1854..3205ef9 100644
+--- a/flutter/windows/runner/Runner.rc
++++ b/flutter/windows/runner/Runner.rc
+@@ -89,13 +89,13 @@ BEGIN
+     BEGIN
+         BLOCK "040904e4"
+         BEGIN
+-            VALUE "CompanyName", "Purslane Tech Pte. Ltd." "\0"
+-            VALUE "FileDescription", "RustDesk Remote Desktop" "\0"
++            VALUE "CompanyName", "Dimension Stone" "\0"
++            VALUE "FileDescription", "D.S Link Remote Access" "\0"
+             VALUE "FileVersion", VERSION_AS_STRING "\0"
+             VALUE "InternalName", "rustdesk" "\0"
+-            VALUE "LegalCopyright", "Copyright © 2026 Purslane Tech Pte. Ltd. All rights reserved." "\0"
+-            VALUE "OriginalFilename", "rustdesk.exe" "\0"
+-            VALUE "ProductName", "RustDesk" "\0"
++            VALUE "LegalCopyright", "D.S Link modifications © 2026 Dimension Stone; based on RustDesk (AGPL-3.0)" "\0"
++            VALUE "OriginalFilename", "DSLink.exe" "\0"
++            VALUE "ProductName", "D.S Link" "\0"
+             VALUE "ProductVersion", VERSION_AS_STRING "\0"
+         END
+     END
+diff --git a/src/flutter.rs b/src/flutter.rs
+index e6b325c..ef4f90b 100644
+--- a/src/flutter.rs
++++ b/src/flutter.rs
+@@ -189,7 +189,10 @@ pub unsafe extern "C" fn free_c_args(ptr: *mut *mut c_char, len: c_int) {
+ #[cfg(windows)]
+ #[no_mangle]
+ pub unsafe extern "C" fn get_rustdesk_app_name(buffer: *mut u16, length: i32) -> i32 {
+-    let name = crate::platform::wide_string(&crate::get_app_name());
++    // D.S Link keeps RustDesk's internal application/configuration identity so
++    // existing device IDs and settings continue to work, while presenting the
++    // Dimension Stone product name in the Windows shell.
++    let name = crate::platform::wide_string("D.S Link");
+     if length > name.len() as i32 {
+         std::ptr::copy_nonoverlapping(name.as_ptr(), buffer, name.len());
+         return 0;
+diff --git a/src/flutter_ffi.rs b/src/flutter_ffi.rs
+index 0777443..d3b9dd1 100644
+--- a/src/flutter_ffi.rs
++++ b/src/flutter_ffi.rs
+@@ -1087,11 +1087,11 @@ pub fn main_get_socks() -> Vec<String> {
+ }
+ 
+ pub fn main_get_app_name() -> String {
+-    get_app_name()
++    "D.S Link".to_owned()
+ }
+ 
+ pub fn main_get_app_name_sync() -> SyncReturn<String> {
+-    SyncReturn(get_app_name())
++    SyncReturn("D.S Link".to_owned())
+ }
+ 
+ pub fn main_uri_prefix_sync() -> SyncReturn<String> {

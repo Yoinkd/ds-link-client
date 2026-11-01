@@ -198,3 +198,5 @@ jobs:
           retention-days: 30
           if-no-files-found: error
           path: dist/DSLink-Client-1.4.9-unsigned/
+
+# Build refresh: 2026-11-02
